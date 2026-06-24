@@ -89,7 +89,7 @@ function renderTasks(tasks) {
 }
 
 async function toggleTaskStatus(id, currentStatus) {
-    const newStatus = currentStatus === 'completed' ? 'Active' : 'Completed';
+    const newStatus = currentStatus === 'completed' ? 'active' : 'completed';
 
     await fetch(`/api/tasks/${id}`, {
         method: 'PUT',
