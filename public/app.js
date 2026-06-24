@@ -69,10 +69,46 @@ function renderTasks(tasks) {
             <h3>${task.title}</h3>
             <p>${task.description || 'Описание отсутствует'}</p>
             <p>Статус: ${task.status}</p>
+
+            <button onclick="toggleTaskStatus(${task.id}, '${task.status}')">
+                ${task.status === 'completed' ? 'Сделать активной' : 'Отметить выполненной'}
+            </button>
+
+            <button onclick="deleteTask(${task.id})">
+                Удалить
+            </button>
         `;
 
         taskList.appendChild(taskCard);
     });
+}
+
+async function toggleTaskStatus(id, currentStatus) {
+    const newStatus = currentStatus === 'completed' ? 'active' : 'completed';
+
+    await fetch(`/api/tasks/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+    });
+
+    loadTasks();
+}
+
+async function deleteTask(id) {
+    const isConfirmed = confirm('Удалить задачу?');
+
+    if (!isConfirmed) {
+        return;
+    }
+
+    await fetch(`/api/tasks/${id}`, {
+        method: 'DELETE'
+    });
+
+    loadTasks();
 }
 
 loadTasks();

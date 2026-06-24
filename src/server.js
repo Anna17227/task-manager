@@ -40,6 +40,36 @@ app.post('/api/tasks', async (req, res) => {
     }
 });
 
+app.put('/api/tasks/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const result = await pool.query(
+            'UPDATE tasks SET status = $1 WHERE id = $2 RETURNING *',
+            [status, id]
+        );
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Ошибка при обновлении задачи' });
+    }
+});
+
+app.delete('/api/tasks/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        await pool.query('DELETE FROM tasks WHERE id = $1', [id]);
+
+        res.json({ message: 'Задача удалена' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Ошибка при удалении задачи' });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server started on http://localhost:${PORT}`);
 });
