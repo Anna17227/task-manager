@@ -3,6 +3,10 @@ const taskList = document.getElementById('taskList');
 const taskForm = document.getElementById('taskForm');
 const titleInput = document.getElementById('title');
 const descriptionInput = document.getElementById('description');
+const searchInput = document.getElementById('searchInput');
+const statusFilter = document.getElementById('statusFilter');
+
+let allTasks = [];
 
 taskForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -39,7 +43,8 @@ async function loadTasks() {
 
         const tasks = await response.json();
 
-        renderTasks(tasks);
+        allTasks = tasks;
+        renderTasks(allTasks);
 
     } catch (error) {
         console.error(error);
@@ -84,7 +89,7 @@ function renderTasks(tasks) {
 }
 
 async function toggleTaskStatus(id, currentStatus) {
-    const newStatus = currentStatus === 'completed' ? 'active' : 'completed';
+    const newStatus = currentStatus === 'completed' ? 'Active' : 'Completed';
 
     await fetch(`/api/tasks/${id}`, {
         method: 'PUT',
@@ -110,5 +115,22 @@ async function deleteTask(id) {
 
     loadTasks();
 }
+
+function filterTasks() {
+    const searchText = searchInput.value.toLowerCase();
+    const selectedStatus = statusFilter.value;
+
+    const filteredTasks = allTasks.filter(task => {
+        const matchesSearch = task.title.toLowerCase().includes(searchText);
+        const matchesStatus = selectedStatus === 'all' || task.status === selectedStatus;
+
+        return matchesSearch && matchesStatus;
+    });
+
+    renderTasks(filteredTasks);
+}
+
+searchInput.addEventListener('input', filterTasks);
+statusFilter.addEventListener('change', filterTasks);
 
 loadTasks();
