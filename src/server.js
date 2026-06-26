@@ -14,6 +14,18 @@ const PORT = process.env.PORT || 3000;
 
 const pool = require('./db');
 
+async function initDatabase() {
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS tasks (
+            id SERIAL PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            description TEXT,
+            status VARCHAR(50) DEFAULT 'active',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+}
+
 app.get('/api/health', async (req, res) => {
     try {
         await pool.query('SELECT 1');
@@ -96,6 +108,17 @@ app.delete('/api/tasks/:id', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server started on http://localhost:${PORT}`);
-});
+async function startServer() {
+    try {
+        await initDatabase();
+
+        app.listen(PORT, () => {
+            console.log(`Server started on http://localhost:${PORT}`);
+        });
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+}
+
+startServer();
